@@ -33,13 +33,6 @@ const credentials = ref({
 
 const submitForm = async () => {
     await authStore.register(credentials.value)
-        .then((response) => {
-            console.log(response)
-        })
-        .catch((error) => {
-            console.log(`API call error: ${error}`)
-            return Promise.reject(error)
-        })
 }
 
 </script>

@@ -1,23 +1,33 @@
 import { defineStore } from "pinia"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import api from "../api"
 
 export const useAuthStore = defineStore("auth", () => {
     const user = ref({
         pk: null,
         username: "",
-        email: ""
+        email: "",
+        logged_in: false
     })
+
+    if (localStorage.getItem("user")) {
+        user.value = JSON.parse(localStorage.getItem("user"))
+    }
+
+    watch(
+        user,
+        (newValue) => {
+            localStorage.setItem("user", JSON.stringify(newValue))
+        },
+        { deep: true }
+    )
 
     const login = async (credentials) => {
         await api.post("token/", credentials)
             .then((response) => {
-                user.value = response.data
+                user.value = response.data.user
+                user.value.logged_in = true
                 console.log(response)
-            })
-            .catch((error) => {
-                console.log(`API call error: ${error}`)
-                return Promise.reject(error)
             })
     }
 
@@ -26,10 +36,6 @@ export const useAuthStore = defineStore("auth", () => {
             .then((response) => {
                 console.log(`Refresh token: ${response}`)
             })
-            .catch((error) => {
-                console.log(`API call error: ${error}`)
-                return Promise.reject(error)
-            })
     }
 
     const logout = async () => {
@@ -37,20 +43,12 @@ export const useAuthStore = defineStore("auth", () => {
             .then((response) => {
                 console.log(response)
             })
-            .catch((error) => {
-                console.log(`API call error: ${error}`)
-                return Promise.reject(error)
-            })
     }
 
     const register = async (credentials) => {
         await api.post("register/", credentials)
             .then((response) => {
                 console.log(response)
-            })
-            .catch((error) => {
-                console.log(`API call error: ${error}`)
-                return Promise.reject(error)
             })
     }
 
